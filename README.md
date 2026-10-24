@@ -2,6 +2,8 @@
 
 一个纯前端、零依赖的「人机验证（CAPTCHA）闯关」小游戏。参考 Cloudflare Turnstile、Google reCAPTCHA、Steam 登录验证等真人检测思路，把常见的人机验证方式做成 100 个由易到难的关卡。你要一路通过验证，向系统证明「你是人类，不是机器人」。
 
+**在线试玩（GitHub Pages）**：https://baisha499.github.io/human-vs-ai-100/
+
 ## 玩法
 
 - 共 **100 关**，每关都是一种真人验证挑战，一关比一关难。
@@ -48,11 +50,13 @@ python3 -m http.server 8000
 # 浏览器访问 http://localhost:8000/
 ```
 
-## 部署到 GitHub Pages
+## GitHub Pages（已部署）
 
-1. 把仓库推送到 GitHub；
-2. 仓库 **Settings → Pages → Source** 选择 `main` 分支根目录；
-3. 稍等即可通过 `https://<用户名>.github.io/human-vs-ai-100/` 访问。
+站点已通过 GitHub Pages 上线，源为 `main` 分支根目录：
+
+- 在线地址：https://baisha499.github.io/human-vs-ai-100/
+- 每次推送到 `main` 会自动重新构建发布。
+- 若以后在别处重建：仓库 **Settings → Pages → Source** 选 `main` 分支根目录即可。
 
 ## 技术说明
 

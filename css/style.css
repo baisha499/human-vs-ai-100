@@ -115,6 +115,15 @@ body{
 .mem-card.open{background:#e8f0fe;color:var(--blue);}
 .mem-card.matched{background:#e6f4ea;color:var(--green);cursor:default;}
 
+/* 动作游戏（手机适配） */
+.game-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.game-canvas{max-width:320px;width:100%;border-radius:12px;touch-action:none;user-select:none;}
+.game-bar{font-size:14px;font-weight:600;color:var(--sub);}
+.impulse-btn{background:#202124;color:#fff;font-size:20px;padding:18px 30px;border-radius:14px;min-width:220px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:360px;}
+.opt-btn{padding:14px;font-size:16px;}
+.traj-btns .btn{font-size:22px;min-width:80px;}
+
 /* 选关 */
 .level-picker-wrap{margin-top:22px;}
 .picker-title{font-size:16px;margin-bottom:10px;}

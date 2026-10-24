@@ -446,10 +446,212 @@
     return { getState: () => ({}) };
   }
 
+  /* ================= 12. 忍住别按 ================= */
+  function renderImpulse(ch, stage, h) {
+    const p = ch.params;
+    const wrap = el('div', 'traj-wrap');
+    const btn = el('button', 'btn impulse-btn', 'DO NOT PRESS');
+    const label = el('div', '', `坚持 ${p.wait.toFixed(0)} 秒不要点`);
+    wrap.append(btn, label);
+    stage.append(wrap);
+    h.setSubmitVisible(false);
+    let remain = p.wait, done = false;
+    const iv = setInterval(() => {
+      remain -= 0.1;
+      if (p.tempt && remain < 2) btn.textContent = '就点一下嘛…';
+      label.textContent = `还剩 ${Math.max(0, remain).toFixed(1)} 秒，别碰！`;
+      if (remain <= 0) { done = true; clearInterval(iv); h.report(true); }
+    }, 100);
+    btn.addEventListener('click', () => { if (!done) { clearInterval(iv); h.report(false); } });
+    return { dispose: () => clearInterval(iv) };
+  }
+
+  /* ================= 13. 算式比大小 ================= */
+  function renderCompare(ch, stage, h) {
+    const p = ch.params;
+    const wrap = el('div', 'math-wrap');
+    const q = el('div', 'math-q', `${p.a}  ?  ${p.b}`);
+    const row = el('div', 'traj-btns');
+    ['>', '<', '='].forEach(sym => {
+      const b = el('button', 'btn', sym);
+      b.addEventListener('click', () => h.report(sym === ch.answer));
+      row.append(b);
+    });
+    wrap.append(q, row);
+    stage.append(wrap);
+    h.setSubmitVisible(false);
+    return {};
+  }
+
+  /* ================= 14. 常识选择 ================= */
+  function renderCommon(ch, stage, h) {
+    const p = ch.params;
+    const wrap = el('div', 'math-wrap');
+    const q = el('div', 'math-q', p.q);
+    const row = el('div', 'opt-grid');
+    p.opts.forEach((o, i) => {
+      const b = el('button', 'btn opt-btn', o);
+      b.addEventListener('click', () => h.report(i === ch.answer));
+      row.append(b);
+    });
+    wrap.append(q, row);
+    stage.append(wrap);
+    h.setSubmitVisible(false);
+    return {};
+  }
+
+  /* ================= 15. 记忆复述 ================= */
+  function renderMemorySeq(ch, stage, h) {
+    const p = ch.params;
+    const wrap = el('div', 'distort-wrap');
+    const cv = document.createElement('canvas');
+    cv.width = 300; cv.height = 120;
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#f7f8fa'; ctx.fillRect(0, 0, 300, 120);
+    ctx.fillStyle = '#202124'; ctx.font = 'bold 56px monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(p.seq.join(' '), 150, 60);
+    const input = document.createElement('input');
+    input.className = 'text-input'; input.maxLength = p.seq.length;
+    input.placeholder = '记住后按顺序输入';
+    wrap.append(cv, input);
+    stage.append(wrap);
+    h.setSubmitVisible(true);
+    setTimeout(() => { ctx.clearRect(0, 0, 300, 120); ctx.fillStyle = '#bbb'; ctx.font = '28px sans-serif'; ctx.fillText('已消失，凭记忆输入', 150, 60); }, Math.max(1800, p.seq.length * 450));
+    return { getState: () => ({ input: input.value }) };
+  }
+
+  /* ================= 19. 开车躲避（动作·手机点按） ================= */
+  function renderCar(ch, stage, h) {
+    const p = ch.params;
+    const wrap = el('div', 'game-wrap');
+    const cv = document.createElement('canvas');
+    cv.width = 300; cv.height = 420;
+    cv.className = 'game-canvas';
+    wrap.append(cv);
+    const bar = el('div', 'game-bar', `目标 ${p.goal}m · 0m`);
+    wrap.append(bar);
+    stage.append(wrap);
+    h.setSubmitVisible(false);
+
+    const ctx = cv.getContext('2d');
+    const LANES = [55, 150, 245];
+    let lane = 1;
+    let meters = 0, raf = null, over = false;
+    const obs = [];
+    let last = performance.now(), spawn = 0;
+
+    const draw = () => {
+      ctx.clearRect(0, 0, 300, 420);
+      // 路面
+      ctx.fillStyle = '#3c4043'; ctx.fillRect(0, 0, 300, 420);
+      ctx.strokeStyle = '#fff'; ctx.setLineDash([18, 18]); ctx.lineWidth = 3;
+      [100, 200].forEach(x => { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 420); ctx.stroke(); });
+      ctx.setLineDash([]);
+      // 障碍车
+      obs.forEach(o => {
+        ctx.fillStyle = '#d93025';
+        roundRect(ctx, LANES[o.lane] - 26, o.y, 52, 74, 8); ctx.fill();
+      });
+      // 玩家车
+      ctx.fillStyle = '#1a73e8';
+      roundRect(ctx, LANES[lane] - 26, 350, 52, 74, 8); ctx.fill();
+    };
+    const frame = (now) => {
+      if (over) return;
+      const dt = (now - last) / 1000; last = now;
+      meters += p.speed * dt * 4;
+      obs.forEach(o => o.y += p.speed * 60 * dt);
+      for (let i = obs.length - 1; i >= 0; i--) if (obs[i].y > 440) obs.splice(i, 1);
+      spawn -= dt;
+      if (spawn <= 0) {
+        spawn = 1 / p.density;
+        // 避免同屏同车道连出
+        let ln = Math.floor(Math.random() * 3);
+        if (!obs.some(o => o.lane === ln && o.y < 120)) obs.push({ lane: ln, y: -80 });
+      }
+      // 碰撞
+      for (const o of obs) {
+        if (o.lane === lane && Math.abs(o.y - 350) < 60) { over = true; cancelAnimationFrame(raf); h.report(false); return; }
+      }
+      draw();
+      bar.textContent = `目标 ${p.goal}m · ${Math.min(meters | 0, p.goal)}m`;
+      if (meters >= p.goal) { over = true; cancelAnimationFrame(raf); h.report(true); return; }
+      raf = requestAnimationFrame(frame);
+    };
+    const onTap = (e) => {
+      const r = cv.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+      if (x < r.width / 2) lane = Math.max(0, lane - 1); else lane = Math.min(2, lane + 1);
+    };
+    cv.addEventListener('pointerdown', onTap);
+    raf = requestAnimationFrame(frame);
+    return { dispose: () => { over = true; cancelAnimationFrame(raf); } };
+  }
+
+  /* ================= 20. 过马路躲避（动作·手机点按） ================= */
+  function renderCrosswalk(ch, stage, h) {
+    const p = ch.params;
+    const wrap = el('div', 'game-wrap');
+    const cv = document.createElement('canvas');
+    cv.width = 300; cv.height = 360;
+    cv.className = 'game-canvas';
+    wrap.append(cv);
+    const up = el('button', 'btn primary', '▲ 向前一步');
+    const bar = el('div', 'game-bar', `走到顶部即过 · ${p.lanes} 条车道`);
+    wrap.append(up, bar);
+    stage.append(wrap);
+    h.setSubmitVisible(false);
+
+    const ctx = cv.getContext('2d');
+    const rows = p.lanes + 2;           // 车道+上下人行道
+    const rowH = 360 / rows;
+    let py = rows - 1;                 // 玩家行（从下往上）
+    let over = false, raf = null;
+    const cars = [];
+    for (let r = 1; r <= p.lanes; r++) {
+      cars.push({ row: r, x: Math.random() * 260, dir: r % 2 ? 1 : -1, sp: p.speed * (0.7 + Math.random() * 0.6) });
+    }
+    const draw = () => {
+      ctx.clearRect(0, 0, 300, 360);
+      for (let r = 0; r < rows; r++) {
+        ctx.fillStyle = r === 0 || r === rows - 1 ? '#e6f4ea' : '#3c4043';
+        ctx.fillRect(0, r * rowH, 300, rowH);
+      }
+      cars.forEach(c => {
+        ctx.fillStyle = '#d93025'; roundRect(ctx, c.x, c.row * rowH + 8, 56, rowH - 16, 8); ctx.fill();
+      });
+      // 玩家
+      ctx.fillStyle = '#1a73e8';
+      roundRect(ctx, 130, py * rowH + 8, 40, rowH - 16, 8); ctx.fill();
+    };
+    const frame = (now) => {
+      if (over) return;
+      cars.forEach(c => {
+        c.x += c.dir * c.sp * 1.6;
+        if (c.x > 300) c.x = -60; if (c.x < -60) c.x = 300;
+        // 碰撞（玩家在该车道行且横向重叠）
+        if (c.row === py && c.x < 170 && c.x + 56 > 130) { over = true; cancelAnimationFrame(raf); h.report(false); return; }
+      });
+      if (py === 0) { over = true; cancelAnimationFrame(raf); h.report(true); return; }
+      draw();
+      raf = requestAnimationFrame(frame);
+    };
+    up.addEventListener('click', () => {
+      if (over) return;
+      py = Math.max(0, py - 1);
+    });
+    raf = requestAnimationFrame(frame);
+    return { dispose: () => { over = true; cancelAnimationFrame(raf); } };
+  }
+
   const RENDERERS = {
     hold: renderHold, grid: renderGrid, distort: renderDistort, slider: renderSlider,
     seq: renderSeq, math: renderMath, traj: renderTraj, rotate: renderRotate,
-    reflex: renderReflex, dice: renderDice, memory: renderMemory
+    reflex: renderReflex, dice: renderDice, memory: renderMemory,
+    impulse: renderImpulse, compare: renderCompare, common: renderCommon,
+    memorySeq: renderMemorySeq, colorPick: renderGrid, mirror: renderGrid, spot: renderGrid,
+    car: renderCar, crosswalk: renderCrosswalk
   };
 
   global.CaptchaChallenges = {

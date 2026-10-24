@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>人机测试 100 关 · Human vs Bot</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <h1>人机测试 <span class="dim">100</span> 关</h1>
+      <p class="sub">证明你是人类，机器人止步于此。越往后越难。</p>
+    </header>
+
+    <section class="progress-panel">
+      <div class="progress-row">
+        <span id="level-label">第 1 / 100 关</span>
+        <span id="best-label">最高解锁：1</span>
+      </div>
+      <div class="progress-bar"><div id="progress-fill"></div></div>
+      <div class="progress-actions">
+        <button id="btn-restart" class="btn small">重来本关</button>
+        <button id="btn-skip" class="btn small ghost" title="看规则">本关说明</button>
+      </div>
+    </section>
+
+    <!-- 验证卡片：所有挑战在这里渲染 -->
+    <main id="captcha-card" class="captcha-card">
+      <div class="card-head">
+        <div class="brand">
+          <span class="logo">🛡</span>
+          <div>
+            <div class="brand-title">安全验证 · Human Verification</div>
+            <div class="brand-sub" id="challenge-kind">正在加载…</div>
+          </div>
+        </div>
+        <div id="verdict" class="verdict hidden"></div>
+      </div>
+      <div id="challenge-stage" class="stage"></div>
+      <div class="card-foot">
+        <span class="foot-hint" id="challenge-hint"></span>
+        <button id="btn-submit" class="btn primary hidden">提交验证</button>
+      </div>
+    </main>
+
+    <section class="level-picker-wrap">
+      <h2 class="picker-title">选择关卡（已解锁可直接进入）</h2>
+      <div id="level-picker" class="level-picker"></div>
+    </section>
+
+    <footer class="footer">
+      纯前端零依赖 · 进度自动保存在本机浏览器 · 通关全部 100 关即通过终极人机测试
+    </footer>
+  </div>
+
+  <script src="js/levels.js"></script>
+  <script src="js/challenges.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

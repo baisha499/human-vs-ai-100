@@ -1,0 +1,112 @@
+:root{
+  --bg:#f1f3f5; --card:#ffffff; --ink:#202124; --sub:#5f6368;
+  --line:#dadce0; --blue:#1a73e8; --green:#188038; --red:#d93025;
+  --gold:#f9ab00; --shadow:0 1px 3px rgba(0,0,0,.12),0 4px 14px rgba(0,0,0,.08);
+  --radius:12px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  background:var(--bg); color:var(--ink); line-height:1.5;
+}
+#app{max-width:680px;margin:0 auto;padding:16px 14px 60px;}
+.topbar h1{font-size:26px;margin:8px 0 2px;}
+.topbar .dim{color:var(--blue);}
+.sub{color:var(--sub);margin:0 0 14px;font-size:14px;}
+
+/* 进度 */
+.progress-panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);margin-bottom:14px;}
+.progress-row{display:flex;justify-content:space-between;font-size:14px;font-weight:600;margin-bottom:8px;}
+#best-label{color:var(--sub);font-weight:400;}
+.progress-bar{height:8px;background:#e8eaed;border-radius:99px;overflow:hidden;}
+#progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--blue),#34a853);transition:width .3s;}
+.progress-actions{margin-top:10px;display:flex;gap:8px;}
+
+/* 按钮 */
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;padding:8px 16px;font-size:14px;cursor:pointer;transition:.15s;}
+.btn:hover{background:#f8f9fa;}
+.btn.small{padding:6px 12px;font-size:13px;}
+.btn.ghost{background:transparent;color:var(--sub);}
+.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+.btn.primary:hover{background:#1765cc;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* 验证卡片 */
+.captcha-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid #eee;}
+.brand{display:flex;gap:12px;align-items:center;}
+.logo{font-size:30px;}
+.brand-title{font-weight:700;font-size:15px;}
+.brand-sub{color:var(--sub);font-size:12.5px;}
+.verdict{font-weight:700;font-size:14px;padding:6px 12px;border-radius:8px;}
+.verdict.ok{color:var(--green);background:#e6f4ea;}
+.verdict.no{color:var(--red);background:#fce8e6;}
+.hidden{display:none!important;}
+
+.stage{padding:18px;min-height:220px;}
+.card-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px;border-top:1px solid #eee;background:#fafbfc;}
+.foot-hint{color:var(--sub);font-size:13px;flex:1;}
+
+/* 通用挑战元素 */
+.check-row{display:flex;align-items:center;gap:14px;padding:10px 4px;}
+.big-checkbox{width:28px;height:28px;border:2px solid #9aa0a6;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;user-select:none;background:#fff;}
+.big-checkbox.checked{background:var(--blue);border-color:var(--blue);color:#fff;}
+.check-label{font-size:18px;}
+.hold-track{margin-top:12px;height:10px;background:#e8eaed;border-radius:99px;overflow:hidden;}
+.hold-track>div{height:100%;width:0;background:var(--green);}
+
+/* 图片网格 */
+.grid-wrap{display:grid;gap:6px;max-width:380px;margin:0 auto;}
+.grid-cell{aspect-ratio:1/1;border:2px solid transparent;border-radius:8px;background:#f7f8fa;display:flex;align-items:center;justify-content:center;font-size:42px;cursor:pointer;position:relative;transition:.1s;user-select:none;}
+.grid-cell.sel{border-color:var(--blue);background:#e8f0fe;}
+.grid-cell canvas{width:100%;height:100%;border-radius:6px;}
+
+/* 扭曲文字 */
+.distort-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;}
+.distort-canvas{background:#f7f8fa;border-radius:10px;}
+.text-input{font-size:22px;letter-spacing:6px;padding:10px 14px;border:1px solid var(--line);border-radius:8px;text-align:center;width:260px;max-width:100%;text-transform:uppercase;}
+
+/* 滑块 */
+.slider-box{max-width:380px;margin:0 auto;}
+.slider-track{position:relative;height:48px;background:#e8eaed;border-radius:10px;overflow:hidden;}
+.slider-gap{position:absolute;top:0;width:44px;height:100%;background:#fff;border:1px dashed #9aa0a6;}
+.slider-knob{position:absolute;top:0;width:44px;height:100%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;cursor:grab;border-radius:10px;box-shadow:var(--shadow);}
+.slider-knob:active{cursor:grabbing;}
+.slider-img{width:100%;height:90px;border-radius:10px;margin-top:10px;background-size:200%;background-position:center;}
+
+/* 顺序点击 */
+.seq-wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;max-width:380px;margin:0 auto;}
+.seq-pill{width:58px;height:58px;border-radius:12px;background:#fff;border:1px solid var(--line);font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;}
+.seq-pill.done{background:#e6f4ea;color:var(--green);border-color:var(--green);}
+.seq-pill.wrong{background:#fce8e6;color:var(--red);}
+
+/* 口算 */
+.math-wrap{text-align:center;}
+.math-q{font-size:30px;font-weight:700;margin:10px 0 16px;}
+.math-input{font-size:26px;padding:10px 14px;width:180px;text-align:center;border:1px solid var(--line);border-radius:8px;}
+
+/* 轨迹判断 */
+.traj-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;}
+.traj-canvas{background:#f7f8fa;border-radius:10px;}
+.traj-btns{display:flex;gap:12px;}
+
+/* 旋转 */
+.rotate-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.rot-canvas{background:#f7f8fa;border-radius:10px;}
+.rot-slider{width:280px;max-width:100%;}
+
+/* 选关 */
+.level-picker-wrap{margin-top:22px;}
+.picker-title{font-size:16px;margin-bottom:10px;}
+.level-picker{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;}
+.level-cell{aspect-ratio:1/1;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);}
+.level-cell.locked{background:#eee;color:#9aa0a6;cursor:not-allowed;}
+.level-cell.cur{background:var(--blue);color:#fff;border-color:var(--blue);}
+.level-cell.done{background:#e6f4ea;color:var(--green);border-color:#b7e1c5;}
+
+.footer{text-align:center;color:var(--sub);font-size:12.5px;margin-top:28px;}
+@media(max-width:480px){
+  .level-picker{grid-template-columns:repeat(8,1fr);}
+  .grid-cell{font-size:32px;}
+}

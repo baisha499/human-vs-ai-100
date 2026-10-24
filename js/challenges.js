@@ -166,18 +166,34 @@
       pos = Math.min(1, Math.max(0, (clientX - r.left) / r.width));
       knob.style.left = (pos * 100) + '%';
     };
+
+    let dragging = false;
+    const onMove = (ev) => {
+      if (!dragging) return;
+      ev.preventDefault();
+      update(ev.clientX);
+    };
+    const onUp = () => {
+      if (!dragging) return;
+      dragging = false;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+    };
     knob.addEventListener('pointerdown', (e) => {
       e.preventDefault();
-      knob.setPointerCapture && knob.setPointerCapture(e.pointerId);
-      const mv = (ev) => update(ev.clientX);
-      const up = () => {
-        knob.removeEventListener('pointermove', mv);
-        knob.removeEventListener('pointerup', up);
-      };
-      knob.addEventListener('pointermove', mv);
-      knob.addEventListener('pointerup', up);
+      dragging = true;
+      try { knob.setPointerCapture(e.pointerId); } catch (_) {}
+      update(e.clientX);
+      window.addEventListener('pointermove', onMove, { passive: false });
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
     });
-    return { getState: () => ({ pos }) };
+
+    return {
+      getState: () => ({ pos }),
+      dispose: onUp
+    };
   }
 
   /* ================= 5. 顺序点击 ================= */

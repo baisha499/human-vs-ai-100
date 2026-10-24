@@ -50,7 +50,7 @@ body{
 
 /* 通用挑战元素 */
 .check-row{display:flex;align-items:center;gap:14px;padding:10px 4px;}
-.big-checkbox{width:28px;height:28px;border:2px solid #9aa0a6;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;user-select:none;background:#fff;}
+.big-checkbox{width:28px;height:28px;border:2px solid #9aa0a6;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;user-select:none;background:#fff;touch-action:none;}
 .big-checkbox.checked{background:var(--blue);border-color:var(--blue);color:#fff;}
 .check-label{font-size:18px;}
 .hold-track{margin-top:12px;height:10px;background:#e8eaed;border-radius:99px;overflow:hidden;}
@@ -69,9 +69,9 @@ body{
 
 /* 滑块 */
 .slider-box{max-width:380px;margin:0 auto;}
-.slider-track{position:relative;height:48px;background:#e8eaed;border-radius:10px;overflow:hidden;}
+.slider-track{position:relative;height:48px;background:#e8eaed;border-radius:10px;overflow:hidden;touch-action:none;}
 .slider-gap{position:absolute;top:0;width:44px;height:100%;background:#fff;border:1px dashed #9aa0a6;}
-.slider-knob{position:absolute;top:0;width:44px;height:100%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;cursor:grab;border-radius:10px;box-shadow:var(--shadow);}
+.slider-knob{position:absolute;top:0;width:44px;height:100%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;cursor:grab;border-radius:10px;box-shadow:var(--shadow);touch-action:none;}
 .slider-knob:active{cursor:grabbing;}
 .slider-img{width:100%;height:90px;border-radius:10px;margin-top:10px;background-size:200%;background-position:center;}
 

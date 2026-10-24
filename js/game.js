@@ -42,6 +42,8 @@
     finished = false;
 
     stage.innerHTML = '';
+    if (active && typeof active.dispose === 'function') active.dispose();
+    active = null;
     verdict.className = 'verdict hidden';
     btnSubmit.classList.add('hidden');
 

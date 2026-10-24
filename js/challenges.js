@@ -325,9 +325,131 @@
     return { getState: () => ({ angle }) };
   }
 
+  /* ================= 9. 反应时 ================= */
+  function renderReflex(ch, stage, h) {
+    const p = ch.params;
+    const wrap = el('div', 'traj-wrap');
+    const btn = el('button', 'btn reflex-btn waiting', '等待变蓝…');
+    const label = el('div', '', '别提前点');
+    wrap.append(btn, label);
+    stage.append(wrap);
+    h.setSubmitVisible(false);
+
+    let lit = false, t0 = 0, timer = setTimeout(() => {
+      lit = true; t0 = performance.now();
+      btn.className = 'btn reflex-btn lit';
+      btn.textContent = '点！';
+      label.textContent = '现在点！';
+    }, randWait(p.waitMin, p.waitMax));
+
+    function randWait(a, b) { return a + Math.random() * (b - a); }
+
+    btn.addEventListener('click', () => {
+      if (!lit) { h.report(false); return; }
+      const ms = performance.now() - t0;
+      label.textContent = `反应 ${Math.round(ms)} ms（需 ≤ ${p.maxMs} ms）`;
+      h.report(ms <= p.maxMs);
+    });
+
+    return { dispose: () => clearTimeout(timer) };
+  }
+
+  /* ================= 10. 骰子计数 ================= */
+  function drawDie(ctx, x, y, size, v) {
+    const r = size * 0.16;
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = '#9aa0a6';
+    roundRect(ctx, x, y, size, size, r);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#202124';
+    const dot = size * 0.11;
+    const pos = {
+      1: [[.5, .5]],
+      2: [[.28, .28], [.72, .72]],
+      3: [[.26, .26], [.5, .5], [.74, .74]],
+      4: [[.28, .28], [.72, .28], [.28, .72], [.72, .72]],
+      5: [[.28, .28], [.72, .28], [.5, .5], [.28, .72], [.72, .72]],
+      6: [[.28, .26], [.72, .26], [.28, .5], [.72, .5], [.28, .74], [.72, .74]]
+    }[v];
+    pos.forEach(([px, py]) => {
+      ctx.beginPath(); ctx.arc(x + px * size, y + py * size, dot, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function renderDice(ch, stage, h) {
+    const p = ch.params;
+    const wrap = el('div', 'distort-wrap');
+    const cv = document.createElement('canvas');
+    cv.width = 320; cv.height = p.small ? 240 : 200;
+    cv.className = 'dice-canvas';
+    const ctx = cv.getContext('2d');
+    const cols = 3, size = p.small ? 56 : 72, gap = 12;
+    p.dice.forEach((v, i) => {
+      const cx = (i % cols), cy = Math.floor(i / cols);
+      drawDie(ctx, 20 + cx * (size + gap), 16 + cy * (size + gap), size, v);
+    });
+    const input = document.createElement('input');
+    input.className = 'math-input';
+    input.type = 'number'; input.inputMode = 'numeric';
+    input.placeholder = '总点数';
+    wrap.append(cv, input);
+    stage.append(wrap);
+    h.setSubmitVisible(true);
+    return { getState: () => ({ input: input.value }) };
+  }
+
+  /* ================= 11. 记忆配对 ================= */
+  function renderMemory(ch, stage, h) {
+    const p = ch.params;
+    const wrap = el('div', 'seq-wrap memory-wrap');
+    const cols = p.faces.length <= 8 ? 4 : 5;
+    wrap.style.gridTemplateColumns = `repeat(${cols},1fr)`;
+    const state = { flipped: [], matched: new Set(), lock: false };
+    const cards = p.faces.map((icon, i) => {
+      const card = el('div', 'mem-card', '?');
+      card.addEventListener('click', () => {
+        if (state.lock || state.matched.has(i) || state.flipped.includes(i)) return;
+        card.classList.add('open'); card.textContent = icon;
+        state.flipped.push(i);
+        if (state.flipped.length === 2) {
+          state.lock = true;
+          const [a, b] = state.flipped;
+          if (p.faces[a] === p.faces[b]) {
+            state.matched.add(a); state.matched.add(b);
+            state.flipped = []; state.lock = false;
+            card.classList.add('matched');
+            if (state.matched.size === p.faces.length) h.report(true);
+          } else {
+            setTimeout(() => {
+              [a, b].forEach(idx => {
+                const c = wrap.children[idx];
+                c.classList.remove('open'); c.textContent = '?';
+              });
+              state.flipped = []; state.lock = false;
+            }, 650);
+          }
+        }
+      });
+      wrap.append(card);
+      return card;
+    });
+    stage.append(wrap);
+    return { getState: () => ({}) };
+  }
+
   const RENDERERS = {
     hold: renderHold, grid: renderGrid, distort: renderDistort, slider: renderSlider,
-    seq: renderSeq, math: renderMath, traj: renderTraj, rotate: renderRotate
+    seq: renderSeq, math: renderMath, traj: renderTraj, rotate: renderRotate,
+    reflex: renderReflex, dice: renderDice, memory: renderMemory
   };
 
   global.CaptchaChallenges = {

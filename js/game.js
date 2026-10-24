@@ -17,12 +17,14 @@
   const bestLabel = $('#best-label');
   const fill = $('#progress-fill');
   const picker = $('#level-picker');
+  const timerEl = $('#timer');
 
   let save = load();
   let current = Math.min(save.current || 1, TOTAL);
   let active = null;      // 当前挑战实例
   let locked = false;     // 成功/失败动画期间锁输入
   let finished = false;
+  let countdownId = null; // 本关倒计时
 
   function load() {
     try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
@@ -44,6 +46,7 @@
     stage.innerHTML = '';
     if (active && typeof active.dispose === 'function') active.dispose();
     active = null;
+    stopTimer();
     verdict.className = 'verdict hidden';
     btnSubmit.classList.add('hidden');
 
@@ -58,16 +61,43 @@
       setSubmitVisible(v) { btnSubmit.classList.toggle('hidden', !v); }
     };
     active = CaptchaChallenges.render(ch, stage, handlers);
+    startTimer(ch);
     renderPicker();
     persist();
   }
 
+  /* ---------- 统一倒计时 ---------- */
+  function stopTimer() {
+    if (countdownId) { clearInterval(countdownId); countdownId = null; }
+    timerEl.textContent = '';
+    timerEl.classList.remove('urgent');
+  }
+  function startTimer(ch) {
+    stopTimer();
+    const limit = ch.params && ch.params.timeLimit;
+    if (!limit) return;
+    let remain = limit;
+    const tick = () => {
+      remain -= 0.1;
+      if (remain <= 0) {
+        stopTimer();
+        finish(false, '超时');
+        return;
+      }
+      timerEl.textContent = `⏱ ${remain.toFixed(1)}s`;
+      timerEl.classList.toggle('urgent', remain <= 5);
+    };
+    tick();
+    countdownId = setInterval(tick, 100);
+  }
+
   /* ---------- 判定 ---------- */
-  function finish(ok) {
+  function finish(ok, reason) {
     if (locked) return;
+    stopTimer();
     locked = true;
     const ch = CaptchaLevels.buildChallenge(current);
-    const state = active ? active.getState() : {};
+    const state = active && typeof active.getState === 'function' ? active.getState() : {};
     const passed = ok === undefined ? CaptchaLevels.checkAnswer(ch, state) : ok;
 
     if (passed) {
@@ -88,7 +118,7 @@
       setTimeout(() => loadLevel(current + 1), 1100);
     } else {
       verdict.className = 'verdict no';
-      verdict.textContent = '✗ 验证失败，请再试一次';
+      verdict.textContent = reason === '超时' ? '✗ 超时未完成，重试' : '✗ 验证失败，请再试一次';
       setTimeout(() => { loadLevel(current); }, 900);
     }
   }
@@ -124,13 +154,16 @@
   function ruleText(type) {
     const R = {
       hold: '按住复选框直到进度条走完，提前松手或瞬间打勾都会被判定为机器人。',
-      grid: '点选所有符合要求的图标格子，选错/漏选都失败。',
-      distort: '从干扰线条和扭曲中读出字符，输入后提交。',
-      slider: '把滑块拖到与白色缺口完全重合，误差要在允许范围内。',
-      seq: '按照要求的顺序依次点击，点错任意一个就清空重来。',
-      math: '心算出算式结果并提交，不允许借助工具。',
-      traj: '人类轨迹带自然抖动和弯曲，机器人是匀速直线，仔细分辨。',
-      rotate: '把倾斜图案调到正立，角度越往后要求越精确。'
+      grid: '点选所有符合要求的图标格子，选错/漏选都失败，限时。',
+      distort: '从干扰线条和扭曲中读出字符，输入后提交，限时。',
+      slider: '把滑块拖到与白色缺口精确重合，误差要求越来越小，限时。',
+      seq: '按要求顺序依次点击，点错任意一个就清空重来，限时。',
+      math: '心算结果并提交，多步/数列题限时，不允许借助工具。',
+      traj: '人类轨迹带自然抖动弯曲，机器人是匀速直线，后期机器人会伪装，限时。',
+      rotate: '把倾斜图案调到正立，角度要求越来越精确，限时。',
+      reflex: '按钮变蓝后立刻点，提前点判负，反应超过毫秒阈值也判负。',
+      dice: '快速数出所有骰子总点数并提交，骰子越小越密集，限时。',
+      memory: '翻牌配对，把所有相同图案找出，错配翻回，限时。'
     };
     return R[type] || '';
   }

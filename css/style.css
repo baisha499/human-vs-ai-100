@@ -96,6 +96,25 @@ body{
 .rot-canvas{background:#f7f8fa;border-radius:10px;}
 .rot-slider{width:280px;max-width:100%;}
 
+/* 倒计时 */
+.timer{font-variant-numeric:tabular-nums;font-weight:700;color:var(--sub);min-width:64px;text-align:right;}
+.timer.urgent{color:var(--red);}
+
+/* 反应时 */
+.reflex-btn{font-size:22px;padding:18px 34px;border-radius:14px;min-width:220px;}
+.reflex-btn.waiting{background:#e8eaed;color:#5f6368;border-color:#dadce0;}
+.reflex-btn.lit{background:var(--blue);color:#fff;border-color:var(--blue);animation:pulse .5s infinite alternate;}
+@keyframes pulse{from{box-shadow:0 0 0 0 rgba(26,115,232,.5);}to{box-shadow:0 0 0 12px rgba(26,115,232,0);}}
+
+/* 骰子 */
+.dice-canvas{background:#f7f8fa;border-radius:10px;}
+
+/* 记忆配对 */
+.memory-wrap{display:grid;gap:10px;max-width:380px;margin:0 auto;}
+.mem-card{aspect-ratio:1/1;border-radius:12px;background:#1a73e8;color:#fff;font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;transition:.15s;}
+.mem-card.open{background:#e8f0fe;color:var(--blue);}
+.mem-card.matched{background:#e6f4ea;color:var(--green);cursor:default;}
+
 /* 选关 */
 .level-picker-wrap{margin-top:22px;}
 .picker-title{font-size:16px;margin-bottom:10px;}
